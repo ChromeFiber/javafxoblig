@@ -1,12 +1,15 @@
 package sample;
 
+import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 
 public abstract class Form {
     int venstre, topp;
     int bredde, høyde;
+    Canvas canvas = new Canvas(1000, 1000);
     int startX, startY, sluttX, sluttY;
     Color farge = Color.WHITE;
 
@@ -17,16 +20,12 @@ public abstract class Form {
         this.høyde = 100;
     }
 
-    public void flytte(int dx, int dy) {
-        venstre += dx;
-        topp += dy;
-    }
 
     public void setFarge(Color farge) {
         this.farge = farge;
     }
 
-    public void flytt(int dx, int dy) {
+    void flytt(int dx, int dy) {
         // Move the shape by dx pixels horizontally and dy pixels vertically
         // (by changing the position of the top-left corner of the shape).
         venstre += dx;
