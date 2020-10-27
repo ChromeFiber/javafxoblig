@@ -27,9 +27,7 @@ public class Main extends Application {
     Form[] former = new Form[500];
     private final double HEIGHT = 700;
     private final double WIDTH = 650;
-
     int antFigurer = 0;
-
     @Override
     public void start(Stage primaryStage) throws Exception {
         canvas = lagCanvas();
@@ -39,12 +37,9 @@ public class Main extends Application {
         BorderPane root = new BorderPane(canvasHolder);
         root.setStyle("-fx-border-width: 1px; -fx-border-color: black");
         root.setTop(lagVerktøylinje(canvas));
-
-
         primaryStage.setScene(new Scene(root, WIDTH, HEIGHT));
         primaryStage.setTitle("Tegneprogram");
         primaryStage.show();
-
     }
 
 
@@ -54,20 +49,21 @@ public class Main extends Application {
         //Lager ett panel som inneholder de knappene og andre verktøyene
         //man trenger for å lage figurene i programmet.
         ColorPicker fargeVelger = new ColorPicker();
-        TextField børsteStørrelse = new TextField();
+        /*TextField børsteStørrelse = new TextField();
         børsteStørrelse.setPromptText("Sett bredde på børsten");
         børsteStørrelse.setFont(Font.font(børsteStørrelse.getText()));
-       /* ToggleGroup toggleFigurer = new ToggleGroup();
+        ToggleGroup toggleFigurer = new ToggleGroup();
         RadioButton rektangel = new RadioButton("Rektangel");
         RadioButton sirkel = new RadioButton("Sirkel");
         RadioButton linje = new RadioButton("Linje");
         RadioButton friHånd = new RadioButton("Tegne");
+        RadioButton ikkeTegne = new RadioButton("Ikke tegne");
         CheckBox viskeUt = new CheckBox("Viskelær");
-        rektangel.setToggleGroup(toggleFigurer);
+       rektangel.setToggleGroup(toggleFigurer);
         sirkel.setToggleGroup(toggleFigurer);
         linje.setToggleGroup(toggleFigurer);
         friHånd.setToggleGroup(toggleFigurer);
-
+        ikkeTegne.setToggleGroup(toggleFigurer);
         toggleFigurer.selectedToggleProperty().addListener(((observable, oldValue, newValue) -> {
                 if(rektangel.isSelected()) {
                     canvas.setOnMousePressed(e-> {
@@ -98,6 +94,9 @@ public class Main extends Application {
                             g.setFill(fargeVelger.getValue());
                             g.fillRect(x, y, size, size);
                         }
+                        if(ikkeTegne.isSelected()){
+                            g.setFill(null);
+                        }
                         if(viskeUt.isSelected()) {
                             g.clearRect(x, y, size, size);
                         }
@@ -123,7 +122,7 @@ rektangel.setOnAction(e -> {
         });
 
         HBox verktøyLinje= new HBox(10);
-        verktøyLinje.getChildren().addAll(fargeVelger, rektangel, sirkel, linje, børsteStørrelse);
+        verktøyLinje.getChildren().addAll(fargeVelger, rektangel, sirkel, linje);
         return verktøyLinje;
         //friHånd, viskeUt,
     }
