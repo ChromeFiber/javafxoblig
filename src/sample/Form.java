@@ -2,7 +2,9 @@ package sample;
 
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
 
 public abstract class Form {
     int venstre, topp;
@@ -89,12 +91,16 @@ class Linje extends Form {
     public Linje(double ey, double ex) {
         super(ey, ex);
     }
+    Line line = new Line();
 
     //Denne klassen representerer linje-objekter
     void tegn(GraphicsContext g) {
         g.beginPath();
+        g.strokeLine(getTopp(), getVenstre(), getVenstre()+20, getTopp() + 20);
 
-        g.strokeLine(10, 10, 100, 10);
         g.stroke();
+    }
+    public void handle(MouseEvent mouseEvent){
+
     }
 }

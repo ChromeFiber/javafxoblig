@@ -84,40 +84,46 @@ public class Main extends Application {
                         tegnCanvas();
                     });*/
                     canvas.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
-                        leggTilFigur(new Rektangel(event.getX(), event.getY()));
-                        defaultFarge = fargeVelger.getValue();
-
-                        tegnCanvas();
+                        if(event.isAltDown()) {
+                            leggTilFigur(new Rektangel(event.getX(), event.getY()));
+                            defaultFarge = fargeVelger.getValue();
+                            tegnCanvas();
+                        }
                     });
                 } if(sirkel.isSelected()) {
                 canvas.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
-                    defaultFarge = fargeVelger.getValue();
-                    leggTilFigur(new Sirkel(event.getX(), event.getY()));
-                    tegnCanvas();
+                    if(event.isControlDown()) {
+                        defaultFarge = fargeVelger.getValue();
+                        leggTilFigur(new Sirkel(event.getX(), event.getY()));
+                        tegnCanvas();
+                    }
                 });
                 } if(linje.isSelected()) {
                 canvas.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
-                    defaultFarge = fargeVelger.getValue();
-                    leggTilFigur(new Linje(event.getX(), event.getY()));
-                    tegnCanvas();
+                    if(event.isAltDown()&&event.isShiftDown()){
+                        defaultFarge = fargeVelger.getValue();
+                        leggTilFigur(new Linje(event.getX(), event.getY()));
+                        tegnCanvas();
+                    }
                 });
                 }
-                /*if(friHånd.isSelected()){
+               /* if(friHånd.isSelected()){
                     canvas.setOnMouseDragged(e ->{
-                        GraphicsContext g = canvas.getGraphicsContext2D();
-                        double size = Double.parseDouble(børsteStørrelse.getText());
-                        double x = e.getX() - size / 2;
-                        double y = e.getY() - size / 2;
-                        if (friHånd.isSelected()) {
-                            g.setFill(fargeVelger.getValue());
-                            g.fillRect(x, y, size, size);
-                        }
-                        if(ikkeTegne.isSelected()){
-                            g.setFill(null);
-                        }
-                        if(viskeUt.isSelected()) {
-                            g.clearRect(x, y, size, size);
-                        }
+
+                            GraphicsContext g = canvas.getGraphicsContext2D();
+                            double size = Double.parseDouble(børsteStørrelse.getText());
+                            double x = e.getX() - size / 2;
+                            double y = e.getY() - size / 2;
+                            if (friHånd.isSelected()) {
+                                g.setFill(fargeVelger.getValue());
+                                g.fillRect(x, y, size, size);
+                            }
+                            if (ikkeTegne.isSelected()) {
+                                g.setFill(null);
+                            }
+                            if (viskeUt.isSelected()) {
+                                g.clearRect(x, y, size, size);
+                            }
                     });
                 }*/
         }));
