@@ -2,22 +2,38 @@ package sample;
 
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Line;
 
 public abstract class Form {
     int venstre, topp;
     int bredde, høyde;
-    Canvas canvas = new Canvas(1000, 1000);
     int startX, startY, sluttX, sluttY;
     Color farge = Color.WHITE;
-
+    public Form(double ey, double ex){
+        venstre =(int) ey;
+        topp = (int) ex;
+    }
     public void omform() {
-        this.venstre = 10;
-        this.topp = 10;
+        this.venstre = getVenstre();
+        this.topp =getTopp();
         this.bredde = 150;
         this.høyde = 100;
+    }
+
+
+
+    public void setY(double ey){
+        this.venstre = (int)ey;
+    }
+    public void setX(double ex){
+        this.topp = (int) ex;
+    }
+
+    public int getVenstre(){
+        return venstre;
+    }
+    public int getTopp(){
+        return topp;
     }
 
 
@@ -41,27 +57,39 @@ public abstract class Form {
 }
 
 class Rektangel extends Form {
+    public Rektangel(double ey, double ex) {
+        super(ey, ex);
+    }
     // Denne klassen representerer rektangel-figurer
 
     void tegn(GraphicsContext g) {
         g.setFill(farge);
-        g.fillRect(venstre, topp, bredde, høyde);
+        g.fillRect(getVenstre(), getTopp(), bredde, høyde);
         g.setStroke(Color.BLACK);
-        g.strokeRect(venstre, topp, bredde, høyde);
+        g.strokeRect(getVenstre(), getTopp(), bredde, høyde);
     }
 }
 
 class Sirkel extends Form {
+    public Sirkel(double ey, double ex) {
+        super(ey, ex);
+    }
+
     // Denne klassen representerer representerer sirkel-figurer
     void tegn(GraphicsContext g) {
+
         g.setFill(farge);
-        g.fillOval(venstre, topp, bredde, høyde);
+        g.fillOval(getVenstre(), getTopp(), bredde, høyde);
         g.setStroke(Color.BLACK);
-        g.strokeOval(venstre, topp, bredde, høyde);
+        g.strokeOval(getVenstre(), getTopp(), bredde, høyde);
     }
 }
 
 class Linje extends Form {
+    public Linje(double ey, double ex) {
+        super(ey, ex);
+    }
+
     //Denne klassen representerer linje-objekter
     void tegn(GraphicsContext g) {
         g.beginPath();
