@@ -9,11 +9,13 @@ import javafx.scene.shape.Line;
 public abstract class Form {
     int venstre, topp;
     int bredde, høyde;
+    int radius;
     int startX, startY, sluttX, sluttY;
     Color farge = Color.WHITE;
     public Form(double ey, double ex){
         venstre =(int) ey;
         topp = (int) ex;
+
     }
     public void omform() {
         this.venstre = getVenstre();
@@ -22,14 +24,6 @@ public abstract class Form {
         this.høyde = 100;
     }
 
-
-
-    public void setY(double ey){
-        this.venstre = (int)ey;
-    }
-    public void setX(double ex){
-        this.topp = (int) ex;
-    }
 
     public int getVenstre(){
         return venstre;
@@ -50,12 +44,17 @@ public abstract class Form {
         topp += dy;
     }
 
+    void endreStørrelse( int dx, int dy){
+        bredde += dx;
+        høyde += dy;
+    }
+
     public boolean harPunkt(int x, int y) {
         return x >= venstre && x < venstre + bredde && y >= topp && y < topp + høyde;
     }
 
     abstract void tegn(GraphicsContext g);
-
+    abstract double getAreal();
 }
 
 class Rektangel extends Form {
@@ -70,6 +69,10 @@ class Rektangel extends Form {
         g.setStroke(Color.BLACK);
         g.strokeRect(getVenstre(), getTopp(), bredde, høyde);
     }
+    public double getAreal(){
+        return this.bredde * this.høyde;
+    }
+
 }
 
 class Sirkel extends Form {
@@ -81,9 +84,12 @@ class Sirkel extends Form {
     void tegn(GraphicsContext g) {
 
         g.setFill(farge);
-        g.fillOval(getVenstre(), getTopp(), bredde, høyde);
+        g.fillOval(getVenstre(), getTopp(), bredde, bredde);
         g.setStroke(Color.BLACK);
-        g.strokeOval(getVenstre(), getTopp(), bredde, høyde);
+        g.strokeOval(getVenstre(), getTopp(), bredde, bredde);
+    }
+    public double getAreal(){
+        return Math.PI *(bredde/2) * (bredde/2);
     }
 }
 
@@ -97,10 +103,12 @@ class Linje extends Form {
     void tegn(GraphicsContext g) {
         g.beginPath();
         g.strokeLine(getTopp(), getVenstre(), getVenstre()+20, getTopp() + 20);
-
         g.stroke();
     }
     public void handle(MouseEvent mouseEvent){
 
+    }
+    public double getAreal(){
+        return bredde * bredde;
     }
 }

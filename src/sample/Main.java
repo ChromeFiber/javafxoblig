@@ -2,6 +2,9 @@ package sample;
 //https://home.usn.no/lonnesta/kurs/OBJ2000/Oblig/Obligatorisk_oppgave_2020.pdf
 
 import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
@@ -9,12 +12,14 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.scene.robot.Robot;
@@ -26,14 +31,11 @@ public class Main extends Application {
     private final double WIDTH = 650;
     Form[] former = new Form[500];
     int antFigurer = 0;
-    private Color defaultFarge = Color.YELLOW;
+    private Color defaultFarge = Color.WHITE;
     private Canvas canvas;
     private Form figurBlirDratt = null;
     private int prevDragX;  // During drag  ging, these record the x and y coordinates of the
     private int prevDragY;
-    Node selected;
-    Point2D translateStart;
-    Point2D offset;
     public static void main(String[] args) {
         launch(args);
     }
@@ -48,7 +50,6 @@ public class Main extends Application {
         root.setStyle("-fx-border-width: 1px; -fx-border-color: black");
         root.setTop(lagVerktøylinje(canvas));
         root.setBottom(lagBunnLinje(canvas));
-
 
         primaryStage.setScene(new Scene(root, WIDTH, HEIGHT));
         primaryStage.setTitle("Tegneprogram");
@@ -69,6 +70,8 @@ public class Main extends Application {
         RadioButton friHånd = new RadioButton("Tegne");
         RadioButton ikkeTegne = new RadioButton("Ikke tegne");
         CheckBox viskeUt = new CheckBox("Viskelær");
+
+
         rektangel.setCursor(Cursor.HAND);
         sirkel.setCursor(Cursor.HAND);
         rektangel.setToggleGroup(toggleFigurer);
@@ -77,28 +80,26 @@ public class Main extends Application {
         friHånd.setToggleGroup(toggleFigurer);
         ikkeTegne.setToggleGroup(toggleFigurer);
         toggleFigurer.selectedToggleProperty().addListener(((observable, oldValue, newValue) -> {
-                if(rektangel.isSelected()) {
-                    /*canvas.setOnMousePressed(e-> {
-                        defaultFarge = fargeVelger.getValue();
-                        leggTilFigur(new Rektangel(e.getSceneY(), e.getSceneX()));
-                        tegnCanvas();
-                    });*/
                     canvas.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
-                        if(event.isAltDown()) {
+                        if(rektangel.isSelected() && event.isAltDown()) {
                             leggTilFigur(new Rektangel(event.getX(), event.getY()));
                             defaultFarge = fargeVelger.getValue();
+                            final double handleRadius = 5;
+                            //Sirkel som skal festest på figur for å sette størrelse
+                            Circle nyStørrelseHandler = new Circle(handleRadius, Color.BLACK);
+
                             tegnCanvas();
                         }
                     });
-                } if(sirkel.isSelected()) {
+
                 canvas.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
-                    if(event.isControlDown()) {
+                    if(sirkel.isSelected() && event.isControlDown()) {
                         defaultFarge = fargeVelger.getValue();
                         leggTilFigur(new Sirkel(event.getX(), event.getY()));
                         tegnCanvas();
                     }
                 });
-                } if(linje.isSelected()) {
+                 if(linje.isSelected()) {
                 canvas.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
                     if(event.isAltDown()&&event.isShiftDown()){
                         defaultFarge = fargeVelger.getValue();
@@ -153,13 +154,11 @@ public class Main extends Application {
 
 
     private HBox lagBunnLinje(Canvas canvas){
-
         TextArea musPosisjon = new TextArea();
-
         musPosisjon.setEditable(false);
         musPosisjon.setMinWidth(WIDTH);
         canvas.addEventFilter(MouseEvent.MOUSE_DRAGGED, event -> {
-            musPosisjon.setText("X-posisjon: " + event.getX() +", Y-posisjon: " + event.getY());
+            musPosisjon.setText("X-posisjon: " + event.getX() +", Y-posisjon: " + event.getY() + ". Areal: " + figurBlirDratt.getAreal());
         });
         HBox bunnlinje = new HBox();
         bunnlinje.getChildren().addAll(musPosisjon);
@@ -177,6 +176,11 @@ public class Main extends Application {
         canvas.setOnMousePressed(this::musTrykket);
         canvas.setOnMouseReleased(this::musSluppet);
         canvas.setOnMouseDragged(this::musDratt);
+        canvas.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
+            if (event.isMiddleButtonDown()) {
+                canvas.setOnMouseClicked(this::nyStørrelse);
+            }
+        });
         return canvas;
     }
 
@@ -211,8 +215,20 @@ public class Main extends Application {
         }
     }
 
+
     private void musSluppet(MouseEvent mouseEvent) {
         figurBlirDratt = null;
+    }
+
+    public void nyStørrelse(MouseEvent mouseEvent){
+        int x = (int) mouseEvent.getX();
+        int y = (int) mouseEvent.getY();
+        if(figurBlirDratt != null){
+            figurBlirDratt.endreStørrelse(x - prevDragX, y - prevDragY);
+            prevDragX = x;
+            prevDragY = y;
+            tegnCanvas();
+        }
     }
 
     private void leggTilFigur(Form form) {
@@ -221,6 +237,7 @@ public class Main extends Application {
         former[antFigurer] = form;
         antFigurer++;
         tegnCanvas();
+
     }
 
     public void tegnCanvas() {
