@@ -34,6 +34,7 @@ public class Main extends Application {
     private Form figurBlirDratt = null;
     private int prevDragX;  // During drag  ging, these record the x and y coordinates of the
     private int prevDragY;
+    Stage primaryStage;
     public static void main(String[] args) {
         launch(args);
     }
@@ -68,10 +69,13 @@ public class Main extends Application {
         RadioButton ikkeTegne = new RadioButton("Ikke tegne");
         CheckBox viskeUt = new CheckBox("Viskelær");
         Button lagre = new Button("lagre");
+        Button nyCanvas = new Button("ny");
         TextField setNavn = new TextField();
-
         lagre.setOnAction(e->{
             onSave(setNavn);
+        });
+        nyCanvas.setOnAction(e->{
+            nyttArk();
         });
         rektangel.setCursor(Cursor.HAND);
         sirkel.setCursor(Cursor.HAND);
@@ -138,7 +142,7 @@ public class Main extends Application {
             leggTilFigur(new Linje());
         });*/
         HBox verktøyLinje = new HBox(10);
-        verktøyLinje.getChildren().addAll(fargeVelger, rektangel, sirkel, linje, setNavn, lagre);
+        verktøyLinje.getChildren().addAll(fargeVelger, rektangel, sirkel, linje, setNavn, lagre, nyCanvas);
         return verktøyLinje;
         //friHånd, viskeUt,
     }
@@ -149,7 +153,12 @@ public class Main extends Application {
         musPosisjon.setEditable(false);
         musPosisjon.setMinWidth(WIDTH);
         canvas.addEventFilter(MouseEvent.MOUSE_DRAGGED, event -> {
-            musPosisjon.setText("X-posisjon: " + event.getX() +", Y-posisjon: " + event.getY() + ". Areal: " + figurBlirDratt.getAreal());
+            try{
+                musPosisjon.setText("X-posisjon: " + event.getX() +", Y-posisjon: " + event.getY() + ". Areal: " + figurBlirDratt.getAreal());
+            }catch (NullPointerException e){
+                musPosisjon.setText("X-posisjon: " + event.getX() +", Y-posisjon: " + event.getY() + ". Areal: " + 0);
+            }
+
         });
         HBox bunnlinje = new HBox();
         bunnlinje.getChildren().addAll(musPosisjon);
@@ -251,6 +260,10 @@ public class Main extends Application {
         } catch (Exception e) {
             System.out.println("Failed to save image: " + e);
         }
+    }
+    public void nyttArk(){
+        canvas = lagCanvas();
+        tegnCanvas();
     }
 }
 
