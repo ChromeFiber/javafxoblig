@@ -2,28 +2,21 @@ package sample;
 //https://home.usn.no/lonnesta/kurs/OBJ2000/Oblig/Obligatorisk_oppgave_2020.pdf
 
 import javafx.application.Application;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
-import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
-import javafx.scene.robot.Robot;
-import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class Main extends Application {
@@ -50,7 +43,6 @@ public class Main extends Application {
         root.setStyle("-fx-border-width: 1px; -fx-border-color: black");
         root.setTop(lagVerktøylinje(canvas));
         root.setBottom(lagBunnLinje(canvas));
-
         primaryStage.setScene(new Scene(root, WIDTH, HEIGHT));
         primaryStage.setTitle("Tegneprogram");
         primaryStage.show();
@@ -71,7 +63,6 @@ public class Main extends Application {
         RadioButton ikkeTegne = new RadioButton("Ikke tegne");
         CheckBox viskeUt = new CheckBox("Viskelær");
 
-
         rektangel.setCursor(Cursor.HAND);
         sirkel.setCursor(Cursor.HAND);
         rektangel.setToggleGroup(toggleFigurer);
@@ -80,34 +71,30 @@ public class Main extends Application {
         friHånd.setToggleGroup(toggleFigurer);
         ikkeTegne.setToggleGroup(toggleFigurer);
         toggleFigurer.selectedToggleProperty().addListener(((observable, oldValue, newValue) -> {
-                    canvas.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
-                        if(rektangel.isSelected() && event.isAltDown()) {
-                            leggTilFigur(new Rektangel(event.getX(), event.getY()));
-                            defaultFarge = fargeVelger.getValue();
-                            final double handleRadius = 5;
-                            //Sirkel som skal festest på figur for å sette størrelse
-                            Circle nyStørrelseHandler = new Circle(handleRadius, Color.BLACK);
+            canvas.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
+                if (rektangel.isSelected() && event.isAltDown()) {
+                    leggTilFigur(new Rektangel(event.getX(), event.getY()));
+                    defaultFarge = fargeVelger.getValue();
+                    tegnCanvas();
+                }
+            });
 
-                            tegnCanvas();
-                        }
-                    });
-
+            canvas.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
+                if (sirkel.isSelected() && event.isControlDown()) {
+                    defaultFarge = fargeVelger.getValue();
+                    leggTilFigur(new Sirkel(event.getX(), event.getY()));
+                    tegnCanvas();
+                }
+            });
+            if (linje.isSelected()) {
                 canvas.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
-                    if(sirkel.isSelected() && event.isControlDown()) {
-                        defaultFarge = fargeVelger.getValue();
-                        leggTilFigur(new Sirkel(event.getX(), event.getY()));
-                        tegnCanvas();
-                    }
-                });
-                 if(linje.isSelected()) {
-                canvas.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
-                    if(event.isAltDown()&&event.isShiftDown()){
+                    if (event.isAltDown() && event.isShiftDown()) {
                         defaultFarge = fargeVelger.getValue();
                         leggTilFigur(new Linje(event.getX(), event.getY()));
                         tegnCanvas();
                     }
                 });
-                }
+            }
                /* if(friHånd.isSelected()){
                     canvas.setOnMouseDragged(e ->{
 
@@ -145,7 +132,6 @@ public class Main extends Application {
             defaultFarge = fargeVelger.getValue();
             leggTilFigur(new Linje());
         });*/
-
         HBox verktøyLinje = new HBox(10);
         verktøyLinje.getChildren().addAll(fargeVelger, rektangel, sirkel, linje);
         return verktøyLinje;
@@ -176,11 +162,7 @@ public class Main extends Application {
         canvas.setOnMousePressed(this::musTrykket);
         canvas.setOnMouseReleased(this::musSluppet);
         canvas.setOnMouseDragged(this::musDratt);
-        canvas.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
-            if (event.isMiddleButtonDown()) {
-                canvas.setOnMouseClicked(this::nyStørrelse);
-            }
-        });
+        canvas.setOnMouseEntered(this::nyStørrelse);
         return canvas;
     }
 
@@ -205,14 +187,18 @@ public class Main extends Application {
     }
 
     private void musDratt(MouseEvent mouseEvent) {
-        int x = (int) mouseEvent.getX();
-        int y = (int) mouseEvent.getY();
-        if (figurBlirDratt != null) {
-            figurBlirDratt.flytt(x - prevDragX, y - prevDragY);
-            prevDragX = x;
-            prevDragY = y;
-            tegnCanvas();
-        }
+            int x = (int) mouseEvent.getX();
+            int y = (int) mouseEvent.getY();
+                if (figurBlirDratt != null) {
+                    if(mouseEvent.isMiddleButtonDown()){
+                        figurBlirDratt.endreStørrelse(x - prevDragX, y - prevDragY);
+                    }else {
+                        figurBlirDratt.flytt(x - prevDragX, y - prevDragY);
+                    }
+                    prevDragX = x;
+                    prevDragY = y;
+                    tegnCanvas();
+                }
     }
 
 
@@ -220,14 +206,15 @@ public class Main extends Application {
         figurBlirDratt = null;
     }
 
-    public void nyStørrelse(MouseEvent mouseEvent){
-        int x = (int) mouseEvent.getX();
-        int y = (int) mouseEvent.getY();
-        if(figurBlirDratt != null){
-            figurBlirDratt.endreStørrelse(x - prevDragX, y - prevDragY);
+    public void nyStørrelse(MouseEvent scrollEvent){
+        int x = (int) scrollEvent.getX();
+        int y = (int) scrollEvent.getY();
+        if (figurBlirDratt != null) {
+            figurBlirDratt.endreStørrelse(x + prevDragX, y + prevDragY);
             prevDragX = x;
             prevDragY = y;
-            tegnCanvas();
+            System.out.println(prevDragX);
+            System.out.println(prevDragY);
         }
     }
 
@@ -237,7 +224,6 @@ public class Main extends Application {
         former[antFigurer] = form;
         antFigurer++;
         tegnCanvas();
-
     }
 
     public void tegnCanvas() {
@@ -253,3 +239,4 @@ public class Main extends Application {
         }
     }
 }
+

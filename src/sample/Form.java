@@ -1,8 +1,9 @@
 package sample;
 
-import javafx.scene.canvas.Canvas;
+import javafx.event.EventHandler;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 
@@ -44,7 +45,7 @@ public abstract class Form {
         topp += dy;
     }
 
-    void endreStørrelse( int dx, int dy){
+    void endreStørrelse(int dx, int dy){
         bredde += dx;
         høyde += dy;
     }
