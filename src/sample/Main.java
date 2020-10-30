@@ -3,11 +3,14 @@ package sample;
 
 import javafx.application.Application;
 import javafx.geometry.Point2D;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
+import javafx.scene.effect.ImageInput;
+import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.BorderPane;
@@ -17,6 +20,8 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import javax.imageio.ImageIO;
+import java.io.File;
 
 
 public class Main extends Application {
@@ -62,7 +67,12 @@ public class Main extends Application {
         RadioButton friHånd = new RadioButton("Tegne");
         RadioButton ikkeTegne = new RadioButton("Ikke tegne");
         CheckBox viskeUt = new CheckBox("Viskelær");
+        Button lagre = new Button("lagre");
+        TextField setNavn = new TextField();
 
+        lagre.setOnAction(e->{
+            onSave(setNavn);
+        });
         rektangel.setCursor(Cursor.HAND);
         sirkel.setCursor(Cursor.HAND);
         rektangel.setToggleGroup(toggleFigurer);
@@ -95,25 +105,20 @@ public class Main extends Application {
                     }
                 });
             }
-               /* if(friHånd.isSelected()){
-                    canvas.setOnMouseDragged(e ->{
-
+            canvas.addEventFilter(MouseEvent.MOUSE_DRAGGED, e ->{
+               if(friHånd.isSelected() && e.isMiddleButtonDown() && e.isControlDown()){
                             GraphicsContext g = canvas.getGraphicsContext2D();
                             double size = Double.parseDouble(børsteStørrelse.getText());
                             double x = e.getX() - size / 2;
                             double y = e.getY() - size / 2;
-                            if (friHånd.isSelected()) {
-                                g.setFill(fargeVelger.getValue());
-                                g.fillRect(x, y, size, size);
-                            }
-                            if (ikkeTegne.isSelected()) {
-                                g.setFill(null);
-                            }
+                            g.setFill(fargeVelger.getValue());
+                            g.fillRect(x, y, size, size);
+
                             if (viskeUt.isSelected()) {
                                 g.clearRect(x, y, size, size);
                             }
-                    });
-                }*/
+                    }});
+
         }));
 
        /* Button rektangel = new Button("Rektangel");
@@ -133,7 +138,7 @@ public class Main extends Application {
             leggTilFigur(new Linje());
         });*/
         HBox verktøyLinje = new HBox(10);
-        verktøyLinje.getChildren().addAll(fargeVelger, rektangel, sirkel, linje);
+        verktøyLinje.getChildren().addAll(fargeVelger, rektangel, sirkel, linje, setNavn, lagre);
         return verktøyLinje;
         //friHånd, viskeUt,
     }
@@ -236,6 +241,15 @@ public class Main extends Application {
         for (int i = 0; i < antFigurer; i++) {
             Form f = former[i];
             f.tegn(gc);
+        }
+    }
+    public void onSave(TextField navn) {
+        String lagreNavn = navn.getText();
+        try {
+            Image screenShot = canvas.snapshot(null, null);
+            ImageIO.write(SwingFXUtils.fromFXImage(screenShot, null), "png", new File(lagreNavn+".png"));
+        } catch (Exception e) {
+            System.out.println("Failed to save image: " + e);
         }
     }
 }
