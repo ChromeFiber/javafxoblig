@@ -94,22 +94,42 @@ class Sirkel extends Form {
     }
 }
 
+class Ellipse extends Form {
+    public Ellipse(double ey, double ex) {
+        super(ey, ex);
+    }
+
+    // Denne klassen representerer representerer ellipse-figurer
+    void tegn(GraphicsContext g) {
+
+        g.setFill(farge);
+        g.fillOval(getVenstre(), getTopp(), bredde, høyde);
+        g.setStroke(Color.BLACK);
+        g.strokeOval(getVenstre(), getTopp(), bredde, høyde);
+    }
+    public double getAreal(){
+        return Math.PI *(bredde/2) * (bredde/2);
+    }
+}
+
 class Linje extends Form {
     public Linje(double ey, double ex) {
         super(ey, ex);
     }
-    Line line = new Line();
 
     //Denne klassen representerer linje-objekter
     void tegn(GraphicsContext g) {
         g.beginPath();
-        g.strokeLine(getTopp(), getVenstre(), getVenstre()+20, getTopp() + 20);
+        g.lineTo(høyde, bredde);
+       // g.strokeLine(getTopp(), getVenstre(), getVenstre()+20, getTopp() + 20);
         g.stroke();
     }
     public void handle(MouseEvent mouseEvent){
 
     }
-    public double getAreal(){
-        return bredde * bredde;
+
+    @Override
+    double getAreal() {
+        return 0;
     }
 }
