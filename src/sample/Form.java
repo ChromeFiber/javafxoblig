@@ -25,8 +25,6 @@ public abstract class Form {
     }
 
     public void omform() {
-        this.venstre = getVenstre();
-        this.topp = getTopp();
         this.bredde = 150;
         this.høyde = 100;
     }
@@ -43,7 +41,9 @@ public abstract class Form {
     public void setFarge(Color farge) {
         this.farge = farge;
     }
-
+    public Color getFarge(){
+        return farge;
+    }
     void flytt(int dx, int dy) {
         // Flytter figuren med dx piksler horisontalt og dy piksler vertikalt
         // Med å forandre posisjonen av top-venstre hjørne av figuren
