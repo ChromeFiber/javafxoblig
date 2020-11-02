@@ -11,17 +11,14 @@ public abstract class Form {
     String ellipse = "Ellipse";
     String sirkel = "Sirkel";
     String rektangel ="Rektangel";
-    int radius;
-    int startX, startY, sluttX, sluttY;
     Color farge = Color.WHITE;
+
     public Form(double ey, double ex){
         venstre =(int) ey;
         topp = (int) ex;
-
     }
 
     public Form() {
-
     }
 
     public void omform() {
@@ -118,12 +115,12 @@ class Ellipse extends Form {
 
     // Denne klassen representerer representerer ellipse-figurer
     void tegn(GraphicsContext g) {
-
         g.setFill(farge);
         g.fillOval(getVenstre(), getTopp(), bredde, høyde);
         g.setStroke(Color.BLACK);
         g.strokeOval(getVenstre(), getTopp(), bredde, høyde);
     }
+
     boolean harPunkt(int x, int y) {
         // Check whether (x,y) is inside this oval, using the
         // mathematical equation of an ellipse.  This replaces the
@@ -135,9 +132,11 @@ class Ellipse extends Form {
         double cy = topp + ry;    // y-coord of center of ellipse
         return (ry * (x - cx)) * (ry * (x - cx)) + (rx * (y - cy)) * (rx * (y - cy)) <= rx * rx * ry * ry;
     }
+
     public double getAreal(){
         return Math.PI *(bredde/2) * (bredde/2);
     }
+
     public String getForm(){
         return ellipse;
     }

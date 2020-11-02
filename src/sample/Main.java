@@ -17,6 +17,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
 import javafx.stage.Screen;
@@ -45,6 +46,7 @@ public class Main extends Application {
     private BorderPane root;
     double startY, startX, sluttY, sluttX;//start og slutt på linje
     Line tegnLinje = new Line();
+    Circle tegnSirkel = new Circle();
 
     public static void main(String[] args) {
         launch(args);
