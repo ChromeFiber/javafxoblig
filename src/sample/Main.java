@@ -52,7 +52,7 @@ public class Main extends Application {
     private ImageView imageView;
     private BorderPane root;
     double startY, startX, sluttY, sluttX;//start og slutt på linje
-    Line tegnLinje;
+    Line tegnLinje = new Line();
     public static void main(String[] args) {
         launch(args);
     }
@@ -119,50 +119,57 @@ public class Main extends Application {
         friHånd.setToggleGroup(toggleFigurer);
         ikkeTegne.setToggleGroup(toggleFigurer);
         toggleFigurer.selectedToggleProperty().addListener(((observable, oldValue, newValue) -> {
-            canvas.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
-                if (rektangel.isSelected() && event.isAltDown()) {
-                    leggTilFigur(new Rektangel(event.getX(), event.getY()));
-                    defaultFarge = fargeVelger.getValue();
-                }
-            });
+                    canvas.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
+                        if (rektangel.isSelected() && event.isAltDown()) {
+                            leggTilFigur(new Rektangel(event.getX(), event.getY()));
+                            defaultFarge = fargeVelger.getValue();
+                        }
+                    });
 
-            canvas.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
-                if (sirkel.isSelected() && event.isControlDown()) {
-                    defaultFarge = fargeVelger.getValue();
-                    leggTilFigur(new Sirkel(event.getX(), event.getY()));
-                }
-            });
+                    canvas.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
+                        if (sirkel.isSelected() && event.isControlDown()) {
+                            defaultFarge = fargeVelger.getValue();
+                            leggTilFigur(new Sirkel(event.getX(), event.getY()));
+                        }
+                    });
 
-            canvas.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
-                if (ellipse.isSelected() && event.isControlDown() && event.isAltDown()) {
-                    defaultFarge = fargeVelger.getValue();
-                    leggTilFigur(new Ellipse(event.getX(), event.getY()));
-                }
-            });
+                    canvas.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
+                        if (ellipse.isSelected() && event.isControlDown() && event.isAltDown()) {
+                            defaultFarge = fargeVelger.getValue();
+                            leggTilFigur(new Ellipse(event.getX(), event.getY()));
+                        }
+                    });
 
-            linje.setOnAction(event -> {
-                if (linje.isSelected()) {
+
                     canvas.addEventHandler(MouseEvent.MOUSE_PRESSED, ev -> {
-                        if (ev.isControlDown() && ev.isShiftDown()) {
+                        if (linje.isSelected() && ev.isControlDown() && ev.isShiftDown()) {
                             startX = ev.getX();
                             startY = ev.getY();
-                            leggTilFigur(new Linje(startX, startY));
-                        }});
-                    canvas.addEventHandler(MouseEvent.MOUSE_DRAGGED, ev -> {
+                            tegnLinje.setStartX(ev.getX());
+                            tegnLinje.setStartY(ev.getY());
+                        }
+                    });
+                  /*  canvas.addEventHandler(MouseEvent.MOUSE_DRAGGED, ev -> {
                         if (ev.isControlDown() && ev.isShiftDown()) {
                             if (tegnLinje == null) {
                                 leggTilFigur(new Linje(ev.getX(), ev.getX()));
-                            } /*else {
+                            } *//*else {
                                 tegnLinje.setEndX(ev.getX());
                                 tegnLinje.setEndY(ev.getY());
-                            }*/
-                        }});
-                    canvas.addEventHandler(MouseEvent.MOUSE_RELEASED, ev -> {
-                        tegnLinje = null;
-                        tegnCanvas();
+                            }*//*
+                        }});*/
+                    canvas.addEventHandler(MouseEvent.MOUSE_RELEASED,ev -> {
+                        if (linje.isSelected() && ev.isControlDown() && ev.isShiftDown()) {
+                            sluttX = ev.getX();
+                            sluttY = ev.getY();
+                            tegnLinje.setEndX(sluttX);
+                            tegnLinje.setEndY(sluttY);
+                            tegnLinje = new Line(startX, startY, sluttX, sluttY);
+                            leggTilFigur(new Linje(tegnLinje.getStartX(), tegnLinje.getStartY(), tegnLinje.getEndX(), tegnLinje.getEndY()));
+                        }
                     });
-                }
-            });
+
+
 
             /*canvas.addEventFilter(MouseEvent.MOUSE_DRAGGED, e -> {
                 if (friHånd.isSelected() && e.isMiddleButtonDown() && e.isControlDown()) {
@@ -192,10 +199,8 @@ public class Main extends Application {
         canvasHolder = new StackPane(visFigur);
         musPosisjon.setEditable(false);
         musPosisjon.setMinWidth(canvas.getWidth());
-
         canvas.addEventFilter(MouseEvent.MOUSE_DRAGGED, event -> {
             try {
-
                 musPosisjon.setText(
                         "X-posisjon: " + event.getX() +  "\n" +
                         "Y-posisjon: " + event.getY() + "\n" +
@@ -212,7 +217,7 @@ public class Main extends Application {
         });
         VBox bunnlinje = new VBox();
         tegnCanvas();
-        bunnlinje.getChildren().addAll(canvasHolder, musPosisjon);
+        bunnlinje.getChildren().addAll(musPosisjon, canvasHolder);
         return bunnlinje;
     }
 

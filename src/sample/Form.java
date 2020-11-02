@@ -3,6 +3,7 @@ package sample;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
 
 public abstract class Form {
     int venstre, topp;
@@ -18,9 +19,14 @@ public abstract class Form {
         topp = (int) ex;
 
     }
+
+    public Form() {
+
+    }
+
     public void omform() {
         this.venstre = getVenstre();
-        this.topp =getTopp();
+        this.topp = getTopp();
         this.bredde = 150;
         this.høyde = 100;
     }
@@ -51,7 +57,7 @@ public abstract class Form {
         høyde += dy;
     }
 
-    public boolean harPunkt(int x, int y) {
+     boolean harPunkt(int x, int y) {
         return x >= venstre && x < venstre + bredde && y >= topp && y < topp + høyde;
     }
 
@@ -118,6 +124,17 @@ class Ellipse extends Form {
         g.setStroke(Color.BLACK);
         g.strokeOval(getVenstre(), getTopp(), bredde, høyde);
     }
+    boolean harPunkt(int x, int y) {
+        // Check whether (x,y) is inside this oval, using the
+        // mathematical equation of an ellipse.  This replaces the
+        // definition of containsPoint that was inherited from the
+        // Shape class.
+        double rx = bredde/2.0;   // horizontal radius of ellipse
+        double ry = høyde/2.0;  // vertical radius of ellipse
+        double cx = venstre + rx;   // x-coord of center of ellipse
+        double cy = topp + ry;    // y-coord of center of ellipse
+        return (ry * (x - cx)) * (ry * (x - cx)) + (rx * (y - cy)) * (rx * (y - cy)) <= rx * rx * ry * ry;
+    }
     public double getAreal(){
         return Math.PI *(bredde/2) * (bredde/2);
     }
@@ -128,16 +145,24 @@ class Ellipse extends Form {
 }
 
 class Linje extends Form {
+    double startX,  startY,  endX,  endY;
     public Linje(double ey, double ex) {
         super(ey, ex);
     }
 
+    public Linje(double startX, double startY, double endX, double endY) {
+        this.startX = startX;
+        this.startY = startY;
+        this.endX = endX;
+        this.endY = endY;
+    }
+
+
     //Denne klassen representerer linje-objekter
     void tegn(GraphicsContext g) {
         g.beginPath();
-        //g.strokeLine(getTopp(), getVenstre(), getVenstre(), getTopp());
-
-        g.stroke();
+        g.strokeLine(startX, startY, endX, endY);
+        g.setStroke(Color.BLACK);
     }
     public void handle(MouseEvent mouseEvent){
 
