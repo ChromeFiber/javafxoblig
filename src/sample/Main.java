@@ -3,6 +3,7 @@ package sample;
 
 import javafx.application.Application;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -19,8 +20,10 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Box;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import javax.imageio.ImageIO;
@@ -35,12 +38,13 @@ import java.util.Arrays;
 public class Main extends Application {
     private final double HEIGHT = 700;
     private final double WIDTH = 650;
-    Form[] former = new Form[500];
+    Form[] former = new Form[1000000];
     int antFigurer = 0;
     Stage primaryStage;
     TextArea musPosisjon;
     StackPane canvasHolder;
     private Color defaultFarge = Color.WHITE;
+    Rectangle2D skjerm = Screen.getPrimary().getVisualBounds();
     private Canvas canvas;
     private Form figurBlirDratt = null;
     private int prevDragX;  // During drag  ging, these record the x and y coordinates of the
@@ -61,9 +65,11 @@ public class Main extends Application {
         canvasHolder.setStyle("-fx-border-width: 2px; -fx-border-color: #444");
         root = new BorderPane(canvasHolder);
         root.setStyle("-fx-border-width: 1px; -fx-border-color: black");
+        root.setMinHeight(root.getMaxHeight());
+        root.setMinWidth(root.getMaxWidth());
         root.setTop(lagVerktøylinje(canvas));
-        root.setBottom(lagBunnLinje(canvas));
-        primaryStage.setScene(new Scene(root, WIDTH, HEIGHT));
+        root.setRight(lagBunnLinje(canvas));
+        primaryStage.setScene(new Scene(root, skjerm.getWidth(), skjerm.getHeight() - 10));
         primaryStage.setTitle("Tegneprogram");
         primaryStage.show();
     }
@@ -117,7 +123,6 @@ public class Main extends Application {
                 if (rektangel.isSelected() && event.isAltDown()) {
                     leggTilFigur(new Rektangel(event.getX(), event.getY()));
                     defaultFarge = fargeVelger.getValue();
-                    tegnCanvas();
                 }
             });
 
@@ -125,7 +130,6 @@ public class Main extends Application {
                 if (sirkel.isSelected() && event.isControlDown()) {
                     defaultFarge = fargeVelger.getValue();
                     leggTilFigur(new Sirkel(event.getX(), event.getY()));
-                    tegnCanvas();
                 }
             });
 
@@ -133,7 +137,6 @@ public class Main extends Application {
                 if (ellipse.isSelected() && event.isControlDown() && event.isAltDown()) {
                     defaultFarge = fargeVelger.getValue();
                     leggTilFigur(new Ellipse(event.getX(), event.getY()));
-                    tegnCanvas();
                 }
             });
 
@@ -143,15 +146,16 @@ public class Main extends Application {
                         if (ev.isControlDown() && ev.isShiftDown()) {
                             startX = ev.getX();
                             startY = ev.getY();
+                            leggTilFigur(new Linje(startX, startY));
                         }});
                     canvas.addEventHandler(MouseEvent.MOUSE_DRAGGED, ev -> {
                         if (ev.isControlDown() && ev.isShiftDown()) {
                             if (tegnLinje == null) {
-                                addLine(ev.getX(), ev.getY());
-                            } else {
+                                leggTilFigur(new Linje(ev.getX(), ev.getX()));
+                            } /*else {
                                 tegnLinje.setEndX(ev.getX());
                                 tegnLinje.setEndY(ev.getY());
-                            }
+                            }*/
                         }});
                     canvas.addEventHandler(MouseEvent.MOUSE_RELEASED, ev -> {
                         tegnLinje = null;
@@ -182,24 +186,33 @@ public class Main extends Application {
         //friHånd, viskeUt,
     }
 
-    private HBox lagBunnLinje(Canvas canvas) {
+    private VBox lagBunnLinje(Canvas canvas) {
         musPosisjon = new TextArea();
+        Canvas visFigur = new Canvas();
+        canvasHolder = new StackPane(visFigur);
         musPosisjon.setEditable(false);
         musPosisjon.setMinWidth(canvas.getWidth());
 
         canvas.addEventFilter(MouseEvent.MOUSE_DRAGGED, event -> {
             try {
 
-                musPosisjon.setText("X-posisjon: " + event.getX() + ", Y-posisjon: " + event.getY() + ". Areal: " +
-                        figurBlirDratt.getAreal() + ". Type figur: " + figurBlirDratt.getForm()  +
-                        ". Antall figur på skjermen: " + antFigurer);
+                musPosisjon.setText(
+                        "X-posisjon: " + event.getX() +  "\n" +
+                        "Y-posisjon: " + event.getY() + "\n" +
+                        "Areal: " + (int)figurBlirDratt.getAreal()/100 + " Cm" + "\n" +
+                        "Type figur: " + figurBlirDratt.getForm()  + "\n" +
+                        "Antall figur på skjermen: " + antFigurer);
             } catch (NullPointerException e) {
-                musPosisjon.setText("X-posisjon: " + event.getX() + ", Y-posisjon: " + event.getY() + ". Antall figur på skjermen: " + antFigurer);
+                musPosisjon.setText(
+                        "X-posisjon: " + event.getX() + "\n" +
+                        "Y-posisjon: " + event.getY() + "\n" +
+                                "Antall figur på skjermen: " + antFigurer);
             }
 
         });
-        HBox bunnlinje = new HBox();
-        bunnlinje.getChildren().addAll(musPosisjon);
+        VBox bunnlinje = new VBox();
+        tegnCanvas();
+        bunnlinje.getChildren().addAll(canvasHolder, musPosisjon);
         return bunnlinje;
     }
 
@@ -210,7 +223,7 @@ public class Main extends Application {
     }
 
     private Canvas lagCanvas() {
-        Canvas canvas = new Canvas(WIDTH - 50, HEIGHT - 50);
+        Canvas canvas = new Canvas(skjerm.getWidth() - 250, skjerm.getHeight());
         canvas.setOnMousePressed(this::musTrykket);
         canvas.setOnMouseReleased(this::musSluppet);
         canvas.setOnMouseDragged(this::musDratt);

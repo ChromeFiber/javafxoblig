@@ -135,8 +135,8 @@ class Linje extends Form {
     //Denne klassen representerer linje-objekter
     void tegn(GraphicsContext g) {
         g.beginPath();
-        g.lineTo(høyde, bredde);
-       // g.strokeLine(getTopp(), getVenstre(), getVenstre()+20, getTopp() + 20);
+        //g.strokeLine(getTopp(), getVenstre(), getVenstre(), getTopp());
+
         g.stroke();
     }
     public void handle(MouseEvent mouseEvent){
