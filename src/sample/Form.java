@@ -3,18 +3,21 @@ package sample;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Line;
+import javafx.scene.control.TextField;
+import javafx.scene.text.Font;
+
+import java.awt.*;
 
 public abstract class Form {
     int venstre, topp;
     int bredde, høyde;
     String ellipse = "Ellipse";
     String sirkel = "Sirkel";
-    String rektangel ="Rektangel";
+    String rektangel = "Rektangel";
     Color farge = Color.WHITE;
 
-    public Form(double ey, double ex){
-        venstre =(int) ey;
+    public Form(double ey, double ex) {
+        venstre = (int) ey;
         topp = (int) ex;
     }
 
@@ -27,10 +30,11 @@ public abstract class Form {
     }
 
 
-    public int getVenstre(){
+    public int getVenstre() {
         return venstre;
     }
-    public int getTopp(){
+
+    public int getTopp() {
         return topp;
     }
 
@@ -38,9 +42,11 @@ public abstract class Form {
     public void setFarge(Color farge) {
         this.farge = farge;
     }
-    public Color getFarge(){
+
+    public Color getFarge() {
         return farge;
     }
+
     void flytt(int dx, int dy) {
         // Flytter figuren med dx piksler horisontalt og dy piksler vertikalt
         // Med å forandre posisjonen av top-venstre hjørne av figuren
@@ -49,27 +55,30 @@ public abstract class Form {
         topp += dy;
     }
 
-    void endreStørrelse(int dx, int dy){
+    void endreStørrelse(int dx, int dy) {
         bredde += dx;
         høyde += dy;
     }
 
-     boolean harPunkt(int x, int y) {
+
+    boolean harPunkt(int x, int y) {
         return x >= venstre && x < venstre + bredde && y >= topp && y < topp + høyde;
     }
 
     abstract void tegn(GraphicsContext g);
+
     abstract double getAreal();
 
 
     public abstract String getForm();
 }
 
+// Denne klassen representerer rektangel-figurer
 class Rektangel extends Form {
     public Rektangel(double ey, double ex) {
         super(ey, ex);
     }
-    // Denne klassen representerer rektangel-figurer
+
 
     void tegn(GraphicsContext g) {
         g.setFill(farge);
@@ -78,21 +87,24 @@ class Rektangel extends Form {
         g.strokeRect(getVenstre(), getTopp(), bredde, høyde);
 
     }
-    public double getAreal(){
+
+    public double getAreal() {
         return this.bredde * this.høyde;
     }
-    public String getForm(){
+
+    public String getForm() {
         return rektangel;
     }
 
 }
 
+// Denne klassen representerer representerer sirkel-figurer
 class Sirkel extends Form {
     public Sirkel(double ey, double ex) {
         super(ey, ex);
     }
 
-    // Denne klassen representerer representerer sirkel-figurer
+
     void tegn(GraphicsContext g) {
 
         g.setFill(farge);
@@ -100,20 +112,22 @@ class Sirkel extends Form {
         g.setStroke(Color.BLACK);
         g.strokeOval(getVenstre(), getTopp(), bredde, bredde);
     }
-    public double getAreal(){
-        return Math.PI *(bredde/2) * (bredde/2);
+
+    public double getAreal() {
+        return Math.PI * (bredde / 2) * (bredde / 2);
     }
-    public String getForm(){
+
+    public String getForm() {
         return sirkel;
     }
 }
 
+// Denne klassen representerer representerer ellipse-figurer
 class Ellipse extends Form {
     public Ellipse(double ey, double ex) {
         super(ey, ex);
     }
 
-    // Denne klassen representerer representerer ellipse-figurer
     void tegn(GraphicsContext g) {
         g.setFill(farge);
         g.fillOval(getVenstre(), getTopp(), bredde, høyde);
@@ -122,33 +136,34 @@ class Ellipse extends Form {
     }
 
     boolean harPunkt(int x, int y) {
-        // Check whether (x,y) is inside this oval, using the
-        // mathematical equation of an ellipse.  This replaces the
-        // definition of containsPoint that was inherited from the
-        // Shape class.
-        double rx = bredde/2.0;   // horizontal radius of ellipse
-        double ry = høyde/2.0;  // vertical radius of ellipse
-        double cx = venstre + rx;   // x-coord of center of ellipse
-        double cy = topp + ry;    // y-coord of center of ellipse
+        // Denne funksjonen sjekker om (x,y) er på innsida av denne ovalklassa,
+        // med å bruke den matematiske formellen av ein ellipse.
+        // Om den slår til erstatter den definisjonen om 'harPunkt' som var arva fra 'Form' klassa
+        double rx = bredde / 2.0;   // horisontal radius av ellipse
+        double ry = høyde / 2.0;  // vertikal radius av ellipse
+        double cx = venstre + rx;   // x-koord av senter av ellipse
+        double cy = topp + ry;    // y-koord av senter av ellipse
         return (ry * (x - cx)) * (ry * (x - cx)) + (rx * (y - cy)) * (rx * (y - cy)) <= rx * rx * ry * ry;
     }
 
-    public double getAreal(){
-        return Math.PI *(bredde/2) * (bredde/2);
+    public double getAreal() {
+        return Math.PI * (bredde / 2) * (bredde / 2);
     }
 
-    public String getForm(){
+    public String getForm() {
         return ellipse;
     }
 
 }
 
 class Linje extends Form {
-    double startX,  startY,  endX,  endY;
+    double startX, startY, endX, endY;
+
     public Linje(double ey, double ex) {
         super(ey, ex);
     }
 
+    // Ny konstruktør for linje
     public Linje(double startX, double startY, double endX, double endY) {
         this.startX = startX;
         this.startY = startY;
@@ -156,14 +171,14 @@ class Linje extends Form {
         this.endY = endY;
     }
 
-
-    //Denne klassen representerer linje-objekter
+    // Denne klassen representerer linje-objekter
     void tegn(GraphicsContext g) {
         g.beginPath();
         g.strokeLine(startX, startY, endX, endY);
         g.setStroke(Color.BLACK);
     }
-    public void handle(MouseEvent mouseEvent){
+
+    public void handle(MouseEvent mouseEvent) {
 
     }
 
@@ -177,4 +192,37 @@ class Linje extends Form {
         return null;
     }
 
+}
+
+// Denne klassen representerer tekst-objekter
+class Tekst extends Form{
+
+    TextField text;
+    double x;
+    double y;
+    public Tekst(TextField text, double x, double y) {
+        this.text=text;
+        this.x = x;
+        this.y = y;
+    }
+
+    @Override
+    void tegn(GraphicsContext g) {
+        g.setFont(Font.font(20));
+        g.setStroke(farge);
+        g.setFill(farge);
+        g.fillText(text.getText(), x, y);
+        g.strokeText(text.getText(), x, y);
+
+    }
+
+    @Override
+    double getAreal() {
+        return 0;
+    }
+
+    @Override
+    public String getForm() {
+        return null;
+    }
 }
