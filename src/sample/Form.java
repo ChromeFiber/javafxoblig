@@ -1,15 +1,15 @@
 package sample;
 
-import javafx.event.EventHandler;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.input.ScrollEvent;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Line;
 
 public abstract class Form {
     int venstre, topp;
     int bredde, høyde;
+    String ellipse = "Ellipse";
+    String sirkel = "Sirkel";
+    String rektangel ="Rektangel";
     int radius;
     int startX, startY, sluttX, sluttY;
     Color farge = Color.WHITE;
@@ -33,14 +33,15 @@ public abstract class Form {
         return topp;
     }
 
-
+    // Setter farge på figuren
     public void setFarge(Color farge) {
         this.farge = farge;
     }
 
     void flytt(int dx, int dy) {
-        // Move the shape by dx pixels horizontally and dy pixels vertically
-        // (by changing the position of the top-left corner of the shape).
+        // Flytter figuren med dx piksler horisontalt og dy piksler vertikalt
+        // Med å forandre posisjonen av top-venstre hjørne av figuren
+
         venstre += dx;
         topp += dy;
     }
@@ -56,6 +57,9 @@ public abstract class Form {
 
     abstract void tegn(GraphicsContext g);
     abstract double getAreal();
+
+
+    public abstract String getForm();
 }
 
 class Rektangel extends Form {
@@ -69,9 +73,13 @@ class Rektangel extends Form {
         g.fillRect(getVenstre(), getTopp(), bredde, høyde);
         g.setStroke(Color.BLACK);
         g.strokeRect(getVenstre(), getTopp(), bredde, høyde);
+
     }
     public double getAreal(){
         return this.bredde * this.høyde;
+    }
+    public String getForm(){
+        return rektangel;
     }
 
 }
@@ -92,6 +100,9 @@ class Sirkel extends Form {
     public double getAreal(){
         return Math.PI *(bredde/2) * (bredde/2);
     }
+    public String getForm(){
+        return sirkel;
+    }
 }
 
 class Ellipse extends Form {
@@ -110,6 +121,10 @@ class Ellipse extends Form {
     public double getAreal(){
         return Math.PI *(bredde/2) * (bredde/2);
     }
+    public String getForm(){
+        return ellipse;
+    }
+
 }
 
 class Linje extends Form {
@@ -132,4 +147,10 @@ class Linje extends Form {
     double getAreal() {
         return 0;
     }
+
+    @Override
+    public String getForm() {
+        return null;
+    }
+
 }

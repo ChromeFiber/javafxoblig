@@ -8,6 +8,9 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -16,14 +19,17 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
 
 
 public class Main extends Application {
@@ -41,6 +47,8 @@ public class Main extends Application {
     private int prevDragY;
     private ImageView imageView;
     private BorderPane root;
+    double startY, startX, sluttY, sluttX;//start og slutt på linje
+    Line tegnLinje;
     public static void main(String[] args) {
         launch(args);
     }
@@ -78,6 +86,7 @@ public class Main extends Application {
         Button lagre = new Button("Lagre");
         Button lasteOpp = new Button("Laste opp");
         TextField setNavn = new TextField();
+        setNavn.setPromptText("Skriv navn på bildet");
         lagre.setOnAction(e -> {
             onSave(setNavn);
         });
@@ -128,15 +137,28 @@ public class Main extends Application {
                 }
             });
 
-            if (linje.isSelected()) {
-                canvas.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
-                    if (event.isAltDown() && event.isShiftDown()) {
-                        defaultFarge = fargeVelger.getValue();
-                        leggTilFigur(new Linje(event.getX(), event.getY()));
+            linje.setOnAction(event -> {
+                if (linje.isSelected()) {
+                    canvas.addEventHandler(MouseEvent.MOUSE_PRESSED, ev -> {
+                        if (ev.isControlDown() && ev.isShiftDown()) {
+                            startX = ev.getX();
+                            startY = ev.getY();
+                        }});
+                    canvas.addEventHandler(MouseEvent.MOUSE_DRAGGED, ev -> {
+                        if (ev.isControlDown() && ev.isShiftDown()) {
+                            if (tegnLinje == null) {
+                                addLine(ev.getX(), ev.getY());
+                            } else {
+                                tegnLinje.setEndX(ev.getX());
+                                tegnLinje.setEndY(ev.getY());
+                            }
+                        }});
+                    canvas.addEventHandler(MouseEvent.MOUSE_RELEASED, ev -> {
+                        tegnLinje = null;
                         tegnCanvas();
-                    }
-                });
-            }
+                    });
+                }
+            });
 
             /*canvas.addEventFilter(MouseEvent.MOUSE_DRAGGED, e -> {
                 if (friHånd.isSelected() && e.isMiddleButtonDown() && e.isControlDown()) {
@@ -154,22 +176,6 @@ public class Main extends Application {
             });*/
         }));
 
-       /* Button rektangel = new Button("Rektangel");
-        rektangel.setOnAction(e -> {
-            defaultFarge = fargeVelger.getValue();
-            leggTilFigur(new Rektangel());
-
-        });
-        Button sirkel = new Button("Rektangel");
-        sirkel.setOnAction(e -> {
-            defaultFarge = fargeVelger.getValue();
-            leggTilFigur(new Sirkel());
-        });
-        Button linje = new Button("Rektangel");
-        linje.setOnAction(e -> {
-            defaultFarge = fargeVelger.getValue();
-            leggTilFigur(new Linje());
-        });*/
         HBox verktøyLinje = new HBox(10);
         verktøyLinje.getChildren().addAll(fargeVelger, rektangel, sirkel, ellipse, linje, setNavn, lagre, lasteOpp);
         return verktøyLinje;
@@ -179,12 +185,16 @@ public class Main extends Application {
     private HBox lagBunnLinje(Canvas canvas) {
         musPosisjon = new TextArea();
         musPosisjon.setEditable(false);
-        musPosisjon.setMinWidth(WIDTH);
+        musPosisjon.setMinWidth(canvas.getWidth());
+
         canvas.addEventFilter(MouseEvent.MOUSE_DRAGGED, event -> {
             try {
-                musPosisjon.setText("X-posisjon: " + event.getX() + ", Y-posisjon: " + event.getY() + ". Areal: " + figurBlirDratt.getAreal());
+
+                musPosisjon.setText("X-posisjon: " + event.getX() + ", Y-posisjon: " + event.getY() + ". Areal: " +
+                        figurBlirDratt.getAreal() + ". Type figur: " + figurBlirDratt.getForm()  +
+                        ". Antall figur på skjermen: " + antFigurer);
             } catch (NullPointerException e) {
-                musPosisjon.setText("X-posisjon: " + event.getX() + ", Y-posisjon: " + event.getY() + ". Areal: " + 0);
+                musPosisjon.setText("X-posisjon: " + event.getX() + ", Y-posisjon: " + event.getY() + ". Antall figur på skjermen: " + antFigurer);
             }
 
         });
@@ -255,8 +265,6 @@ public class Main extends Application {
             figurBlirDratt.endreStørrelse(x + prevDragX, y + prevDragY);
             prevDragX = x;
             prevDragY = y;
-            System.out.println(prevDragX);
-            System.out.println(prevDragY);
         }
     }
 
@@ -272,9 +280,6 @@ public class Main extends Application {
         GraphicsContext gc = canvas.getGraphicsContext2D();
         gc.setFill(Color.WHITE);
         gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
-        /*for (Form former : figurer) {
-            former.tegn(gc);
-        }*/
         for (int i = 0; i < antFigurer; i++) {
             Form f = former[i];
             f.tegn(gc);
@@ -301,5 +306,11 @@ public class Main extends Application {
             musPosisjon.setText("Fann ikkje fil");
         }*/
     }
+
+    private void addLine(double x, double y) {
+        tegnLinje = new Line(startX, startY, x, y);
+        root.getChildren().add(tegnLinje);
+    }
+
 }
 
